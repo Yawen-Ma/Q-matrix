@@ -1,4 +1,4 @@
-RUN the most recent two files named "50rep_200N_6J_0.5theta.R" and "20_stan_0.5.stan".
+# RUN the most recent two files named "50rep_200N_6J_0.5theta.R" and "20_stan_0.5.stan".
 
 
 
