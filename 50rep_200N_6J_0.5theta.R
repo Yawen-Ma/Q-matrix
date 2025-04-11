@@ -736,3 +736,124 @@ cat("\nDone.\n")
 #  file = "50replics_200_6_0.5.RData" # 50 replications, N = 200, J_t = 6, theta = 0.5
 #)
 
+# Do the same for other simulation conditions and name the RData in the same way as replics_N_J_theta.RData 
+# For example, 50 repications for N = 400, J = 12, theta = 0.7 should be saved as "50replics_400_12_0.7.RData" 
+
+# -------------------------------------------------------
+# Present all results
+# -------------------------------------------------------
+
+# Beta parameters ---------------------------------------------------------
+
+library(dplyr)
+library(tidyr)
+library(xtable)
+
+theta_vec <- c(0.5, 0.7)
+N_vec     <- c(200, 400)
+J_vec     <- c(6, 12)
+
+results_all <- data.frame(
+  beta      = character(),  
+  theta     = numeric(),
+  N         = numeric(),
+  J_t       = numeric(),
+  beta0_k1_bias = numeric(),
+  beta0_k1_mae  = numeric(),
+  beta0_k1_rmse = numeric(),
+  beta0_k2_bias = numeric(),
+  beta0_k2_mae  = numeric(),
+  beta0_k2_rmse = numeric(),
+  betaZ_k1_bias = numeric(),
+  betaZ_k1_mae  = numeric(),
+  betaZ_k1_rmse = numeric(),
+  betaZ_k2_bias = numeric(),
+  betaZ_k2_mae  = numeric(),
+  betaZ_k2_rmse = numeric(),
+  stringsAsFactors = FALSE
+)
+
+for(th in theta_vec){
+  for(n in N_vec){
+    for(j in J_vec){
+      fname <- sprintf("50replics_%d_%d_%0.1f.RData", n, j, th)
+      if(!file.exists(fname)){
+        message("Warning: The file not exists", fname)
+        next
+      }
+      load(fname)  
+      
+      beta0_k1_bias  <- mean(results_summary_df[["beta0_K1_bias"]], na.rm = TRUE)
+      beta0_k1_mae   <- mean(results_summary_df[["beta0_K1_mae"]],  na.rm = TRUE)
+      beta0_k1_rmse  <- mean(results_summary_df[["beta0_K1_rmse"]], na.rm = TRUE)
+      
+      beta0_k2_bias  <- mean(results_summary_df[["beta0_K2_bias"]], na.rm = TRUE)
+      beta0_k2_mae   <- mean(results_summary_df[["beta0_K2_mae"]],  na.rm = TRUE)
+      beta0_k2_rmse  <- mean(results_summary_df[["beta0_K2_rmse"]], na.rm = TRUE)
+      
+      betaZ_k1_bias  <- mean(results_summary_df[["betaZ_K1_bias"]], na.rm = TRUE)
+      betaZ_k1_mae   <- mean(results_summary_df[["betaZ_K1_mae"]],  na.rm = TRUE)
+      betaZ_k1_rmse  <- mean(results_summary_df[["betaZ_K1_rmse"]], na.rm = TRUE)
+      
+      betaZ_k2_bias  <- mean(results_summary_df[["betaZ_K2_bias"]], na.rm = TRUE)
+      betaZ_k2_mae   <- mean(results_summary_df[["betaZ_K2_mae"]],  na.rm = TRUE)
+      betaZ_k2_rmse  <- mean(results_summary_df[["betaZ_K2_rmse"]], na.rm = TRUE)
+      
+      results_all <- rbind(
+        results_all,
+        data.frame(
+          beta           = beta_fixed,
+          theta          = th,
+          N              = n,
+          J_t            = j,
+          beta0_k1_bias  = beta0_k1_bias,
+          beta0_k1_mae   = beta0_k1_mae,
+          beta0_k1_rmse  = beta0_k1_rmse,
+          beta0_k2_bias  = beta0_k2_bias,
+          beta0_k2_mae   = beta0_k2_mae,
+          beta0_k2_rmse  = beta0_k2_rmse,
+          betaZ_k1_bias  = betaZ_k1_bias,
+          betaZ_k1_mae   = betaZ_k1_mae,
+          betaZ_k1_rmse  = betaZ_k1_rmse,
+          betaZ_k2_bias  = betaZ_k2_bias,
+          betaZ_k2_mae   = betaZ_k2_mae,
+          betaZ_k2_rmse  = betaZ_k2_rmse,
+          stringsAsFactors = FALSE
+        )
+      )
+    }
+  }
+}
+results_long <- results_all %>%
+  pivot_longer(
+    cols = c(
+      beta0_k1_bias, beta0_k1_mae, beta0_k1_rmse,
+      beta0_k2_bias, beta0_k2_mae, beta0_k2_rmse,
+      betaZ_k1_bias, betaZ_k1_mae, betaZ_k1_rmse,
+      betaZ_k2_bias, betaZ_k2_mae, betaZ_k2_rmse
+    ),
+    names_to    = c("param","metric"),     
+    names_pattern = "(beta0_k1|beta0_k2|betaZ_k1|betaZ_k2)_(bias|mae|rmse)",
+    values_to   = "value"
+  )
+results_wide <- results_long %>%
+  pivot_wider(
+    id_cols     = c(beta, theta, N, J_t, metric),
+    names_from  = param,    
+    values_from = value     
+  ) %>%
+  mutate(metric = factor(metric, levels = c("bias","mae","rmse"))) %>%
+  arrange(beta, theta, N, J_t, metric)
+results_print <-results_wide
+results_print <- results_print %>%
+  dplyr::select(
+    beta, theta, N, J_t, metric,
+    beta0_k1, beta0_k2, betaZ_k1, betaZ_k2
+  )
+
+results_print
+
+
+
+
+
