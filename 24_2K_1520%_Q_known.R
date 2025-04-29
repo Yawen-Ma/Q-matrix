@@ -91,7 +91,7 @@ compute_confusion <- function(est, true){
 run_one_simulation <- function(seed_number = 123, 
                                N          = 200,
                                J          = 6,
-                               model_path = "~/Downloads/Rstudio_my_code/Amplify_games_test/2024new_dataset/2024_newdataset/Q-matrix/24_stan_1520%_Q_known.stan"
+                               model_path = "~/Downloads/Rstudio_my_code/2024_newdataset/Q-matrix/24_stan_1520%_Q_known.stan" # Change into your address of the stan file
 ) {
   
   # --------------------
@@ -117,11 +117,6 @@ run_one_simulation <- function(seed_number = 123,
   
   gs_true_time1 <- matrix(runif(J*2, 0.05, 0.15), ncol=2)
   gs_true_time2 <- matrix(runif(J*2, 0.05, 0.15), ncol=2)
- # gs_true_time2 <- matrix(runif(J*2, 0.05, 0.15), ncol=2)
- # gs_true_time1 <- matrix(runif(J*2, 0, 0.002), ncol=2)
- # gs_true_time2 <- gs_true_time1
-  #  gs_true_time1 <- matrix(rbeta(J*2, 4, 36), ncol = 2)
-  # gs_true_time2 <- matrix(rbeta(J*2, 4, 36), ncol = 2)
   # Helper functions
   init_probs <- function(z_vec, beta0, betaZ) {
     logit_p <- beta0 + betaZ %*% z_vec
@@ -156,22 +151,11 @@ run_one_simulation <- function(seed_number = 123,
     }
     return(Y)
   }
-  
-  #Not good: Generate alpha1
-  #beta0 <- rep(0, K)  # intercepts
-  #betaZ <- matrix(c(-0.5, 0.3, 0.2,
-  #                 0.2, -0.4, 0.1), nrow=K, byrow=TRUE)
-  #Better prior
-  #beta0 <- c(-1, -0.5)
-  # weakly priors
+
   set.seed(123) 
   beta0 <- rnorm(K, mean = 0, sd = 0.6)  # beta0 ~ N(0, 2)
-  #  beta0 <- rep(0, K)
-  # beta0 <- rnorm(K, mean = 0, sd = 1)
   betaZ <- matrix(rnorm(K * 3, mean =  0, sd = 0.3), nrow = K, ncol = 3)
-  # betaZ <- matrix(c(1.0, 0.8, 0.5,
-  #                   -1.0, -0.5, 0.7), nrow=K, byrow=TRUE)
-  
+ 
   # time point 1
   alpha1 <- matrix(NA, N, K)
   
@@ -181,29 +165,16 @@ run_one_simulation <- function(seed_number = 123,
   }
   
   alpha1 %>% as.data.frame(alpha1) %>% count(V1, V2)
-  # Generate transitions
-  #gamma01 <- matrix(c(0.2, 0.3, -0.4, 0.1,
-  #                    -0.3, 0.4, 0.2, -0.2), nrow=K, ncol=4, byrow=TRUE)
-  #gamma10 <- matrix(c(-0.2, -0.3, 0.4, 0.2,
-  #                    0.3, -0.4, -0.2, 0.1), nrow=K, ncol=4, byrow=TRUE)
-  #gamma01 <- matrix(c(0.5, 0.3, -0.4, 0.1,
-  #                    0.8, 0.4, 0.2, -0.2), nrow=K, ncol=4, byrow=TRUE)
-  #gamma10 <- matrix(c(-0.5, -0.3, 0.4, 0.2,
-  #                    -0.5, -0.4, -0.2, 0.1), nrow=K, ncol=4, byrow=TRUE)
   set.seed(123) 
-  # 先拿一个空矩阵
+
   gamma01 <- matrix(NA, nrow = K, ncol = P+1)  
   gamma10 <- matrix(NA, nrow = K, ncol = P+1)
   
-  # 然后对应拦截项
   gamma01[1,1] <- rnorm(1, mean = -1.66, sd = 0.3)
-  
   gamma10[1,1] <- rnorm(1, mean = -4.87, sd = 1)
   gamma01[2,1] <- rnorm(1, mean = -2.0, sd = 0.3)
-  #gamma10[2,1] <- rnorm(1, mean = -10,   sd = 1)
   gamma10[2,1] <- rnorm(1, mean = -2.2, sd = 0.3)
   
-  # 其余协变量系数仍照原先方式模拟，比如
   for(k in 1:2) {
     for(pp in 2:(P+1)) {
       gamma01[k,pp] <- rnorm(1, mean = 0, sd = 0.3)
@@ -556,7 +527,7 @@ results_summary_df_1520 <- do.call(rbind, all_runs)
 print(results_summary_df_1520)
 
 out_file <- sprintf(
-  "23_2K_1520_Q_known_pct_27Apr_SimSummary_%s.RDS",           # 或 "23_2K_1520%%_SimSummary_%s.RDS"
+  "23_2K_1520_Q_known_pct_27Apr_SimSummary_%s.RDS",          
   format(Sys.time(), "%Y%m%d_%H%M")
 )
 
