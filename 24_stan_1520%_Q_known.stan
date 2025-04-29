@@ -1,11 +1,9 @@
 // =============================================================================
-//  DINA 2‑Attribute, Two‑Time‑Point, Covariates, *Fast 4‑Class* Implementation
+//  DINA, 2 Attribute, 4 Class, 2 Time Points, Covariates Implementation
 // =============================================================================
-//  – K = 2  ⇒   C = 4 latent classes (00,10,01,11)
+//  – K = 2  gives  C = 4 latent classes (00,10,01,11)
 //  – Discrete attribute patterns; likelihood marginalised analytically.
-//  – Occasion‑specific Q matrices are estimated with Beta shrinkage; you can
-//    overwrite fixed 0/1 entries in the “hard constraint” section.
-//  – Initial mastery (β) and transitions (γ) depend on covariates Z.
+//  – Initial mastery (beta) and transitions (gamma) depend on covariates Z.
 //  – Slip/guess item parameters per occasion with Uniform(.05,.15) priors.
 //  – Generated quantities return posterior probabilities for classes & skills.
 // -----------------------------------------------------------------------------
