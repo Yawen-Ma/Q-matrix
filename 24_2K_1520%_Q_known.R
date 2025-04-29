@@ -19,14 +19,14 @@ mod <- cmdstan_model("24_stan_1520%_Q_known.stan")   # Stan file name
 # -------------------------------------------------------
 # Step 2. Define the simulation function
 # -------------------------------------------------------
-# ------------------ Q-matrix 构造器 ------------------
+# ------------------ Q-matrix  ------------------
 make_Q_pair_fixed <- function(J){
   stopifnot(J %in% c(6, 18, 30))
   K <- 2
   
   if(J == 6){
     Q1 <- rbind(
-      diag(1, K), diag(1, K),      # 4 行单维
+      diag(1, K), diag(1, K),    
       c(1,0),
       c(1,1) 
     )
@@ -39,10 +39,10 @@ make_Q_pair_fixed <- function(J){
   
   if(J == 18){
     Q1 <- rbind(
-      matrix(rep(diag(1, K), 3), ncol = K, byrow = TRUE),  # 6 行单维
+      matrix(rep(diag(1, K), 3), ncol = K, byrow = TRUE), 
       matrix(rep(diag(1, K), 3), ncol = K, byrow = TRUE),
       c(1,0), c(0,1),
-      matrix(rep(c(1,1), 4), 4, K, byrow = TRUE)           # 6 行双维
+      matrix(rep(c(1,1), 4), 4, K, byrow = TRUE)         
     )
     Q2 <- rbind(
       c(0,1), c(1,0),
@@ -54,7 +54,7 @@ make_Q_pair_fixed <- function(J){
   
   if(J == 30){
     Q1 <- rbind(
-      matrix(rep(diag(1, K), 6), ncol = K, byrow = TRUE),  # 12 行单维
+      matrix(rep(diag(1, K), 6), ncol = K, byrow = TRUE), 
       matrix(rep(diag(1, K), 6), ncol = K, byrow = TRUE),
       matrix(rep(c(1,1), 6), 6, K, byrow = TRUE)
     )
