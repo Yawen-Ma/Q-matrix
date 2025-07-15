@@ -179,7 +179,7 @@ make_Q_pair_fixed <- function(J) {
 
 
 
-### 3. 单次模拟 + 拟合 + 评估 -------------------------------------------
+### 
 run_one_simulation_rjags_unknownQ <- function(seed_number = 123,
                                               N = 200, 
                                               J = 6,
