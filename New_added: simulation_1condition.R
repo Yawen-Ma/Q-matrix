@@ -320,8 +320,8 @@ run_one_simulation <- function(seed_number = 123,
   stan_summary <- fit$summary()
   
   # Extract Q_time1, Q_time2 means
-  q1_rows <- grep("^Q1\\[", stan_summary$variable)
-  q2_rows <- grep("^Q2\\[", stan_summary$variable)
+  q1_rows <- grep("^Q_time1\\[", stan_summary$variable)
+  q2_rows <- grep("^Q_time2\\[", stan_summary$variable)
   
   Q_est_time1_vec <- stan_summary$mean[q1_rows]
   Q_est_time2_vec <- stan_summary$mean[q2_rows]
