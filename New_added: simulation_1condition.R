@@ -477,8 +477,7 @@ run_one_simulation <- function(seed_number = 123,
     AAR_time2_k1 = AAR_time2[1],
     AAR_time2_k2 = AAR_time2[2]
   )
-  
-  summary_df <- cbind(summary_df, as.list(flat_alpha))
+
   
   return(list(
     summary_df = summary_df,
