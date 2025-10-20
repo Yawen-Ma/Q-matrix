@@ -58,12 +58,14 @@ data {
 }
 
 // -----------------------------------------------------------------------------
+// Q matrix 
+// + 
 // Latent transition model: initial state parameters (beta) + transition parameters (gamma)
 // -----------------------------------------------------------------------------
 parameters {
   real<lower=0, upper=1> theta;                   // Hyperparameter for Q: sparsity
-  real<lower=0, upper=1> Q_time1_raw[J, K];       // Raw Q‐matrix at time 1
-  real<lower=0, upper=1> Q_time2_raw[J, K];       // Raw Q‐matrix at time 2
+  array[J, K] real<lower=0, upper=1> Q_time1_raw;        // Raw Q‐matrix at time 1
+  array[J, K] real<lower=0, upper=1> Q_time2_raw;        // Raw Q‐matrix at time 2
 
   vector<lower=0.05, upper=0.2>[J] g1;            // Guess parameters at time 1
   vector<lower=0.05, upper=0.2>[J] s1;            // Slip parameters at time 1
@@ -82,8 +84,8 @@ parameters {
 // -----------------------------------------------------------------------------
 transformed parameters {
   // 1) Constrain Q‐matrices
-  matrix[J, K] Q_time1 = Q_time1_raw;
-  matrix[J, K] Q_time2 = Q_time2_raw;
+  matrix[J, K] Q_time1 = to_matrix(Q_time1_raw);
+  matrix[J, K] Q_time2 = to_matrix(Q_time2_raw);
   // Time 1 fixed entries
   Q_time1[1,] = [1, 0];
   Q_time1[4,] = [0, 1];
@@ -92,8 +94,8 @@ transformed parameters {
   Q_time2[2,] = [1, 0];
 
   // 2) Ideal responses eta at two time points
-  real xi1[J, 4];
-  real xi2[J, 4];
+  array[J, 4] real xi1;
+  array[J, 4] real xi2;
   for (j in 1:J){
     for (c in 1:4) {
       xi1[j, c] = calc_xi(class2attr(c), to_array_1d(Q_time1[j]));
@@ -124,12 +126,12 @@ transformed parameters {
   }
 
   // 5) 4×4 log transition matrix
-  real log_trans[N,4,4];
+  array[N, 4, 4] real log_trans;
   for (n in 1:N){
     for (c1 in 1:4) {
-      int a1[2] = class2attr(c1);
+      array[2] int a1 = class2attr(c1); 
       for (c2 in 1:4) {
-        int a2[2] = class2attr(c2);
+        array[2] int a2 = class2attr(c2); 
         real lp = 0;
         for (k in 1:2) {
           if (a1[k]==0 && a2[k]==0) lp += log1m(p01[n,k]);
@@ -196,7 +198,7 @@ generated quantities {
   for (n in 1:N) {
     // Recompute log‐likelihoods for posterior
     vector[4] lp1;
-    real lp2_arr[4,4];
+    array[4, 4] real lp2_arr; 
     for (c1 in 1:4) {
       lp1[c1] = log_nu1[n,c1];
       for (j in 1:J) {
@@ -234,6 +236,8 @@ generated quantities {
     }
   }
 }
+
+
 
 
 
