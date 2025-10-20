@@ -391,7 +391,11 @@ run_one_simulation <- function(seed_number = 123,
     bias <- mean(est - true)
     list(rmse = rmse, bias = bias)
   }
-  
+ 
+  # Evaluate Q matrix
+  res_q1 <- evaluate_binary_matrix(Q_est_time1, Q_time1)
+  res_q2 <- evaluate_binary_matrix(Q_est_time2, Q_time2)
+ 
   # Evaluate item parameters
   res_g_t1 <- evaluate_continuous_matrix(g1_est, gs_true_time1[,1])
   res_s_t1 <- evaluate_continuous_matrix(s1_est, gs_true_time1[,2])
