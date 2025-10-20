@@ -11,35 +11,31 @@
 // -----------------------------------------------------------------------------
 functions {
   /**
-   * Map 4 latent class 00, 01, 10, 11 (2 attributes with binary outcomes) to binary attribute vector of length 2
+   * Map 4 latent class 00, 10, 01, 11 (2 attributes with binary outcomes) to binary attribute vector of length 2
    */
   array[] int class2attr(int c) {
     array[2] int a;
-    if (c == 1)        a = {0, 0};
-    else if (c == 2)   a = {1, 0};
-    else if (c == 3)   a = {0, 1};
-    else               a = {1, 1};
+    if (c == 1)        a = {0, 0}; // latent class 1: 00
+    else if (c == 2)   a = {1, 0}; // latent class 2: 10
+    else if (c == 3)   a = {0, 1}; // latent class 3: 01
+    else               a = {1, 1}; // latent class 4: 11
     return a;
   }
 
   /**
-   * Compute the ideal response, 0/1
+   * calc_xi:
+   * Compute the ideal response 0/1 for a given latent attribute vector (alpha)
+   * and item Q-matrix row (Qrow) under a conjunctive (DINA) rule.
+   * Returns:
+   *     - If all required attributes are mastered (a[k]=1 for all required k),
+   *       then ideal response = 1.
+   *     - If any required attribute is not mastered (a[k]=0),
+   *       then ideal response = 0.
+   *     - If attribute is not required, it does not affect the response.
    */
-  int calc_xi(array[] int a, array[] real Qrow) {
+  int calc_xi(array[] int a, array[] real Qrow) { 
     return ( (Qrow[1] > 0.5 ? a[1] : 1)
            * (Qrow[2] > 0.5 ? a[2] : 1) );
-  }
-
-  /**
-   * Soft‐AND of continuous atribute profile (alpha) and Q rows for K attributes:
-   *   ideal response eta
-   */
-  real compute_eta_soft(int K, array[] real alpha_vec, array[] real Q_row) {
-    real log_eta = 0;
-    for (k in 1:K){
-      log_eta += Q_row[k] * log(alpha_vec[k] + 1e-12);
-    }
-    return exp(log_eta);
   }
 }
 
@@ -94,11 +90,12 @@ transformed parameters {
   Q_time2[2,] = [1, 0];
 
   // 2) Ideal responses eta at two time points
+  // compute ideal response for each item j and latent class c at time 1 and 2
   array[J, 4] real xi1;
   array[J, 4] real xi2;
   for (j in 1:J){
     for (c in 1:4) {
-      xi1[j, c] = calc_xi(class2attr(c), to_array_1d(Q_time1[j]));
+      xi1[j, c] = calc_xi(class2attr(c), to_array_1d(Q_time1[j])); //xi1: for each item x for each latent class
       xi2[j, c] = calc_xi(class2attr(c), to_array_1d(Q_time2[j]));
     }
   }
@@ -108,13 +105,15 @@ transformed parameters {
   matrix[N, 2] p10;    // Transiion probability (1->0)
   for (n in 1:N) {
     for (k in 1:2) {
-      p1[n, k]  = inv_logit(beta0[k] + dot_product(betaZ[k], Z[n]));
+      // logistic regression: latent transition model
+      p1[n, k]  = inv_logit(beta0[k] + dot_product(betaZ[k], Z[n])); 
       p01[n, k] = inv_logit(gamma01[k, 1] + dot_product(gamma01[k, 2:], Z[n]));
       p10[n, k] = inv_logit(gamma10[k, 1] + dot_product(gamma10[k, 2:], Z[n]));
     }
   }
 
   // 4) Latent class prior at time 1
+  // log prior probability of student n at latent class c
   matrix[N, 4] log_nu1;
   for (n in 1:N) {
     real p11 = p1[n,1];
@@ -122,7 +121,7 @@ transformed parameters {
     log_nu1[n,1] = log1m(p11) + log1m(p12); // class 1: 00
     log_nu1[n,2] = log(p11)  + log1m(p12); // class 2: 10
     log_nu1[n,3] = log1m(p11) + log(p12); // class 3: 01
-    log_nu1[n,4] = log(p11)  + log(p12); // class 4: 00 
+    log_nu1[n,4] = log(p11)  + log(p12); // class 4: 11 
   }
 
   // 5) 4×4 log transition matrix
@@ -134,10 +133,10 @@ transformed parameters {
         array[2] int a2 = class2attr(c2); 
         real lp = 0;
         for (k in 1:2) {
-          if (a1[k]==0 && a2[k]==0) lp += log1m(p01[n,k]);
-          else if (a1[k]==0 && a2[k]==1) lp += log(p01[n,k]);
-          else if (a1[k]==1 && a2[k]==1) lp += log1m(p10[n,k]);
-          else                           lp += log(p10[n,k]);
+          if (a1[k]==0 && a2[k]==0) lp += log1m(p01[n,k]);       // 0->0: x(1-p01)
+          else if (a1[k]==0 && a2[k]==1) lp += log(p01[n,k]);    // 0->1: xp01
+          else if (a1[k]==1 && a2[k]==1) lp += log1m(p10[n,k]);  // 1->1: x(1-p10)
+          else                           lp += log(p10[n,k]);    // 1->0: xp10
         }
         log_trans[n,c1,c2] = lp;
       }
