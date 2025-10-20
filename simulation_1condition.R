@@ -501,7 +501,7 @@ run_one_simulation <- function(seed_number = 123,
 N <- 200
 J <- 6
 K <- 2
-replications  <- 25 # ideally up to 100
+replications  <- 1 # ideally up to 100
 
 # Rrun replications
 all_runs <- list()
