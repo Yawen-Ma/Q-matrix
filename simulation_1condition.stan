@@ -79,7 +79,8 @@ parameters {
 // TRANSFORMED PARAMETERS
 // -----------------------------------------------------------------------------
 transformed parameters {
-  // 1) Constrain Q‐matrices
+  // 1) Fixing two rows of Q‐matrices
+  // Option: Q-matrix should have a try on not fixing any rows
   matrix[J, K] Q_time1 = to_matrix(Q_time1_raw);
   matrix[J, K] Q_time2 = to_matrix(Q_time2_raw);
   // Time 1 fixed entries
@@ -150,6 +151,7 @@ transformed parameters {
 model {
   // Priors
   theta ~ beta(3, 1);
+  // Option: Q-matrix could have a try on not fixing any rows
   for (j in 1:J) {
     if (j != 1 && j != 4)
       Q_time1_raw[j] ~ beta(theta + 1e-3, (1-theta) + 1e-3);
@@ -158,8 +160,8 @@ model {
   }
   beta0   ~ normal(0, 0.6);
   to_vector(betaZ)  ~ normal(0, 0.3);
-  gamma01[,1] ~ normal(-1.5, 0.3);
-  gamma10[,1] ~ normal(-3.0, 1.0);
+  gamma01[,1] ~ normal(-1.5, 0.3); // more likely to happen 
+  gamma10[,1] ~ normal(-3.0, 1.0); // less likely to forget a skill once mastery
   to_vector(gamma01[,2:]) ~ normal(0, 0.3);
   to_vector(gamma10[,2:]) ~ normal(0, 0.3);
 
