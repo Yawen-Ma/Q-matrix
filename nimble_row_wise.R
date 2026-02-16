@@ -385,10 +385,10 @@ run_one_simulation_nimble_unknownQ <- function(seed_number = 123,
   for (i in 1:N) {
     z_ext <- c(1, Z[i, ])
     for (k in 1:K) {
-      p01_t12 <- invlogit(sum(gamma01[k, ] * z_ext))
+      p01_t12 <- invlogit(sum(gamma01_12[k, ] * z_ext))
       alpha2[i, k] <- if (alpha1[i, k] == 1) 1 else rbinom(1, 1, p01_t12)
       
-      p01_t23 <- invlogit(sum(gamma01[k, ] * z_ext))
+      p01_t23 <- invlogit(sum(gamma01_23[k, ] * z_ext))
       alpha3[i, k] <- if (alpha2[i, k] == 1) 1 else rbinom(1, 1, p01_t23)
     }
   }
