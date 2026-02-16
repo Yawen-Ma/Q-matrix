@@ -98,7 +98,6 @@ run_one_simulation_nimble_unknownQ <- function(seed_number = 123,
                                                J = 6,
                                                Q_matrix = Q_matrix,
                                                n.chains = 2,
-                                               n.adapt  = 1000,   # nimble这里保留接口但不强制使用
                                                n.burnin = 1000,
                                                n.iter   = 2000,
                                                thin     = 1) {
@@ -271,11 +270,11 @@ run_one_simulation_nimble_unknownQ <- function(seed_number = 123,
   Rmodel <- nimbleModel(code = nimble_model_code,
                         constants = constants,
                         data = data_list,
-                        inits = inits_list[[1]])  # 先给一个，用于建模结构
+                        inits = inits_list[[1]])  
   
   Cmodel <- compileNimble(Rmodel)
   
-  # MCMC configuration (不改你逻辑：默认采样器，让nimble自己分配)
+  # MCMC configuration 
   conf <- configureMCMC(Rmodel, monitors = params_monitor, thin = thin)
   
   Rmcmc <- buildMCMC(conf)
@@ -287,7 +286,7 @@ run_one_simulation_nimble_unknownQ <- function(seed_number = 123,
                      nburnin = n.burnin,
                      nchains = n.chains,
                      inits = inits_list,
-                     samplesAsCodaMCMC = TRUE,   # 让它像 rjags 一样是 coda mcmc.list
+                     samplesAsCodaMCMC = TRUE,  
                      thin = thin,
                      setSeed = seed_number + 0:(n.chains - 1))
   
